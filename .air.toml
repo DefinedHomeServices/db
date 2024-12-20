@@ -1,0 +1,57 @@
+# This is the main .air.toml file used to configure air. When running the ./deploy.sh script it will copy this file to the .air.toml file in the root of each of the services. For example, ./finance, and ./appointments.  If you need to make a change to the  .air.toml file then you should make the change in this file and then run the ./deploy.sh script.  If you add more services to the project, then you should add the service in the ./deploy.sh script.
+
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  args_bin = []
+  bin = "./tmp/main"
+  cmd = "go build -v -o ./tmp/main ."
+  delay = 1000
+  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_file = []
+  exclude_regex = ["_test.go"]
+  exclude_unchanged = false
+  follow_symlink = false
+  full_bin = "dlv attach --accept-multiclient --log --headless --listen :40000 --api-version 2 ./tmp/main --"
+
+  # If this value is set to [.] then delve will not work. So when you want to debug using VSCode remove the [.] from the include_dir. However, if you do this then Air will not work so your code will not automatically rebuild in the docker container when you make changes.
+  include_dir = [.] 
+  include_ext = ["go", "tpl", "tmpl", "html"]
+  include_file = []
+  kill_delay = "0s"
+  log = "build-errors.log"
+  poll = false
+  poll_interval = 0
+  post_cmd = []
+  pre_cmd = []
+  rerun = false
+  rerun_delay = 500
+  send_interrupt = false
+  stop_on_error = false
+
+[color]
+  app = ""
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
+
+[log]
+  main_only = false
+  silent = false
+  time = false
+
+[misc]
+  clean_on_exit = false
+
+[proxy]
+  app_port = 0
+  enabled = false
+  proxy_port = 0
+
+[screen]
+  clear_on_rebuild = false
+  keep_scroll = true
+

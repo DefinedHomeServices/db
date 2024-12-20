@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8080"
+      - "40000:40000"
+    volumes:
+      - .:/app # Mount the current directory to /app inside the container
+      - /app/tmp # Ensures Go cache doesn’t conflict with local machine    
+    command: ["air"] # Run Air for live reloading

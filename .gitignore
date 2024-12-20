@@ -1,0 +1,68 @@
+# Contains sensitive information
+service-account.json
+
+# Build files
+tmp/
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of the go coverage tool
+*.cover
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Go modules
+vendor/
+
+# Go build artifacts
+bin/
+build/
+
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# macOS Finder directory attributes
+Icon?
+._*
+
+# macOS resource fork files
+.Spotlight-V100
+.Trashes
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Visual Studio Code
+.vscode/
+.history/
+*.code-workspace
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.old
+*.orig
+*.save
+
+# IDE specific files
+.idea/
+*.iml
