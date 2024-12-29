@@ -12,6 +12,7 @@ import (
 // FirebaseAPIClient defines a method for creating a customer in the database
 type FirebaseAPIClient interface {
     AddCustomerToDatabase(ctx context.Context, customer map[string]interface{}) (string, error)
+    GetCustomer(ctx context.Context, email string) (map[string]interface{}, error)
 }
 
 // FirebaseDBClient holds a Firestore client to interact with the Firebase database
@@ -19,9 +20,27 @@ type FirebaseDBClient struct {
     DB  *firestore.Client
 }
 
-// CreateCustomerHandler handles customer creation requests
-type CreateCustomerHandler struct {
+// CustomerHandler handles customer creation requests
+type CustomerHandler struct {
     client 	FirebaseAPIClient
+}
+
+func (h *FirebaseDBClient) GetCustomer(ctx context.Context, email string) (map[string]interface{}, error) {
+    fmt.Println("Getting customer from email:", email)
+    docRef := h.DB.Collection("customers").Where("email", "==", email).Documents(ctx)
+    docs, err := docRef.GetAll()
+    
+    if (len(docs ) == 0) {
+        return nil, nil
+    }
+
+    if err != nil {
+        fmt.Println("Error getting customer:", err)
+        return nil, err
+    }
+    customer := docs[0].Data()
+    
+    return customer, nil
 }
 
 func (h *FirebaseDBClient) AddCustomerToDatabase(ctx context.Context, customer map[string]interface{}) (string, error) {
@@ -35,13 +54,32 @@ func (h *FirebaseDBClient) AddCustomerToDatabase(ctx context.Context, customer m
     return docRef.ID, nil
 }
 
-// NewCreateCustomerHandler creates a new CreateCustomerHandler with a given FirebaseAPIClient
-func NewCreateCustomerHandler(client FirebaseAPIClient) *CreateCustomerHandler {
-    return &CreateCustomerHandler{client: client}
+// NewCustomerHandler creates a new CreateCustomerHandler with a given FirebaseAPIClient
+func NewCustomerHandler(client FirebaseAPIClient) *CustomerHandler {
+    return &CustomerHandler{client: client}
+}
+
+func (h *CustomerHandler) HandleGetCustomer(w http.ResponseWriter, r *http.Request) {
+    email := r.URL.Query().Get("email")
+    if email == "" {
+        http.Error(w, "Missing email parameter", http.StatusBadRequest)
+        return
+    }
+    customer, err := h.client.GetCustomer(r.Context(), email)
+    if err != nil {
+        http.Error(w, fmt.Sprintf("Failed to get customer: %v", err), http.StatusInternalServerError)
+        return
+    }
+    if customer == nil {
+        http.Error(w, "Customer not found", http.StatusNotFound)
+        return
+    }
+    json.NewEncoder(w).Encode(customer)
+    return
 }
 
 // HandleCreateCustomer handles the HTTP request to create a new customer
-func (h *CreateCustomerHandler) HandleCreateCustomer(w http.ResponseWriter, r *http.Request) {
+func (h *CustomerHandler) HandleCreateCustomer(w http.ResponseWriter, r *http.Request) {
     var customer map[string]interface{}
     
     err := json.NewDecoder(r.Body).Decode(&customer)
@@ -66,7 +104,7 @@ func (h *CreateCustomerHandler) HandleCreateCustomer(w http.ResponseWriter, r *h
     json.NewEncoder(w).Encode(response)    
 }
 
-func (h *CreateCustomerHandler) CreateCustomer(customer map[string]interface{}) (string, error) {
+func (h *CustomerHandler) CreateCustomer(customer map[string]interface{}) (string, error) {
     ctx := context.Background()
 
     fmt.Printf("Creating customer in Firebase %v", customer)

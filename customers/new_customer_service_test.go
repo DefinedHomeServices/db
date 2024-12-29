@@ -88,7 +88,7 @@ func TestCreateCustomerHandler_HandleCreateCustomer(t *testing.T) {
             mockClient := &MockFirebaseAPIClient{
                 CreateCustomerFunc: tt.mockFunc,
             }
-            handler := NewCreateCustomerHandler(mockClient)
+            handler := NewCustomerHandler(mockClient)
 
             err := handler.CreateCustomer(tt.customer)
             if tt.expectedError != nil {
